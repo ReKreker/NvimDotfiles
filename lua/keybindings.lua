@@ -50,3 +50,13 @@ vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts)
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
 vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, opts)
+
+-- other
+vim.keymap.set('n', '<C-s>', ':w<CR>' ) -- save hotkey
+vim.keymap.set('i', '<C-s>', '<ESC>:w<CR>a' )
+vim.keymap.set('v', '<C-c>', '"+y' ) -- copy&paste stuff
+vim.keymap.set('v', '<C-x>', '"+d' )
+vim.keymap.set('', '<A-j>', 'gj' ) -- long lines navigation
+vim.keymap.set('', '<A-k>', 'gk' )
+vim.keymap.set('i', '<A-j>', '<ESC>gji' )
+vim.keymap.set('i', '<A-k>', '<ESC>gki' )

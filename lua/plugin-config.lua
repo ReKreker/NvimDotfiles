@@ -64,16 +64,16 @@ require("nvim-tree").setup()
 require("nvim-surround").setup()
 
 -- ( hjkl config )
-require('delaytrain').setup {
-    delay_ms = 1000, -- How long repeated usage of a key should be prevented
-    grace_period = 1, -- How many repeated keypresses are allowed
-    keys = { -- Which keys (in which modes) should be delayed
-        ['nv'] = {'h', 'j', 'k', 'l'},
-        ['nvi'] = {'<Left>', '<Down>', '<Up>', '<Right>'}
-    },
-    ignore_filetypes = {} -- Example: set to {"help", "NvimTr*"} to
-    -- disable the plugin for help and NvimTree
-}
+-- require("delaytrain").setup {
+--     delay_ms = 1000, -- How long repeated usage of a key should be prevented
+--     grace_period = 1, -- How many repeated keypresses are allowed
+--     keys = { -- Which keys (in which modes) should be delayed
+--         ['nv'] = {'h', 'j', 'k', 'l'},
+--         ['nvi'] = {'<Left>', '<Down>', '<Up>', '<Right>'}
+--     },
+--     ignore_filetypes = {} -- Example: set to {"help", "NvimTr*"} to
+--     -- disable the plugin for help and NvimTree
+-- }
 
 -- ( nvim-cmp )
 local cmp = require 'cmp'
@@ -94,8 +94,8 @@ cmp.setup({
         -- REQUIRED - you must specify a snippet engine
         expand = function(args)
             vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
-            -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
-            -- require('snippy').expand_snippet(args.body) -- For `snippy` users.
+            -- require("luasnip").lsp_expand(args.body) -- For `luasnip` users.
+            -- require("snippy").expand_snippet(args.body) -- For `snippy` users.
             -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
         end
     },
@@ -119,42 +119,92 @@ cmp.setup({
 })
 
 -- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
-cmp.setup.cmdline({'/', '?'}, {
-    mapping = cmp.mapping.preset.cmdline(),
-    sources = {{name = 'buffer'}}
-})
+--cmp.setup.cmdline({'/', '?'}, {
+--    mapping = cmp.mapping.preset.cmdline(),
+--    sources = {{name = 'buffer'}}
+--})
 
 -- Set up lspconfig.
-local lspconfig = require('lspconfig')
+local lspconfig = require("lspconfig")
 local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
+capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
 local on_attach = function(client, bufnr)
     -- Mappings.
     -- See `:help vim.lsp.*` for documentation on any of the below functions
     local bufopts = {noremap = true, silent = true} -- , buffer=bufnr }
     vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
     vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
-    vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
+    vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
     vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, bufopts)
     vim.keymap.set('n', '<C-s>', vim.lsp.buf.signature_help, bufopts)
+    vim.keymap.set('n', '<space>h', vim.lsp.buf.hover, bufopts)
     vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, bufopts)
     vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, bufopts)
     vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
-    vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
     vim.keymap.set('n', '<space>f',
                    function() vim.lsp.buf.format {async = true} end, bufopts)
+    require("lsp_signature").on_attach({
+	  bind = true, -- This is mandatory, otherwise border config won't get registered.
+	  hint_prefix = "> ",  -- Panda for parameter, NOTE: for the terminal not support emoji, might crash
+	  handler_opts = {
+	    border = "rounded"   -- double, rounded, single, shadow, none, or a table of borders
+	  },
+	  floating_window_above_cur_line = false,
+	  select_signature_key = "<M-n>"
+    }, bufnr)
 end
 
-local servers = {'clangd', 'pylsp', 'cmake', 'tsserver'}
+local servers = {
+    'pylsp', 
+    'cmake', 
+    'tsserver'}
 -- Enable some language servers with the additional completion capabilities offered by nvim-cmp
 for _, lsp in ipairs(servers) do
     lspconfig[lsp].setup {on_attach = on_attach, capabilities = capabilities}
 end
+lspconfig["clangd"].setup {
+    on_attach = on_attach,
+    capabilities = capabilities,
+    cmd = {
+	"clangd",
+	"--background-index",
+	-- by default, clang-tidy use -checks=clang-diagnostic-*,clang-analyzer-*
+	-- to add more checks, create .clang-tidy file in the root directory
+	-- and add Checks key, see https://clang.llvm.org/extra/clang-tidy/
+	"--clang-tidy",
+	"--completion-style=bundled",
+	"--cross-file-rename",
+	"--header-insertion=iwyu",
+    }
+
+}
 
 -- ( hop )
-require('hop').setup()
+require("hop").setup()
+
+-- ( hex color viewer )
+require("nvim-highlight-colors").setup()
 
 -- ( LuaLine )
-require('lualine').setup{
+require("lualine").setup{
     options = { theme = "codedark" }
 }
+
+-- ( Diagrams )
+function _G.Toggle_venn()
+    local venn_enabled = vim.inspect(vim.b.venn_enabled)
+    if venn_enabled == "nil" then
+        vim.b.venn_enabled = true
+        -- draw a line on HJKL keystokes
+        vim.api.nvim_buf_set_keymap(0, "n", "J", "<C-v>j:VBox<CR>", {noremap = true})
+        vim.api.nvim_buf_set_keymap(0, "n", "K", "<C-v>k:VBox<CR>", {noremap = true})
+        vim.api.nvim_buf_set_keymap(0, "n", "L", "<C-v>l:VBox<CR>", {noremap = true})
+        vim.api.nvim_buf_set_keymap(0, "n", "H", "<C-v>h:VBox<CR>", {noremap = true})
+        -- draw a box by pressing "f" with visual selection
+        vim.api.nvim_buf_set_keymap(0, "v", "f", ":VBox<CR>", {noremap = true})
+    else
+        vim.cmd[[mapclear <buffer>]]
+        vim.b.venn_enabled = nil
+    end
+end
+vim.api.nvim_set_keymap('n', '<space>v', ":lua Toggle_venn()<CR>", { noremap = true})
