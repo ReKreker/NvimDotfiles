@@ -16,6 +16,9 @@ return require('packer').startup(function(use)
     use 'brenoprata10/nvim-highlight-colors'
 
     -- LSP
+    use 'williamboman/mason.nvim'
+    use 'williamboman/mason-lspconfig.nvim'
+    use 'neovim/nvim-lspconfig'
     use 'nvim-treesitter/nvim-treesitter'
     use 'nvim-treesitter/nvim-treesitter-textobjects'
     use 'ray-x/lsp_signature.nvim'
@@ -36,7 +39,6 @@ return require('packer').startup(function(use)
     use 'rafamadriz/friendly-snippets'
 
     -- Completion stuff
-    use 'neovim/nvim-lspconfig'
     use 'hrsh7th/nvim-cmp'
     use 'hrsh7th/cmp-nvim-lsp'
     use 'hrsh7th/cmp-buffer'
@@ -58,5 +60,4 @@ return require('packer').startup(function(use)
     -- Converting
     use 'glts/vim-magnum'
     use 'glts/vim-radical'
-
 end)

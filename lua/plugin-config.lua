@@ -92,6 +92,7 @@ cmp.setup({
     },
     snippet = {
         -- REQUIRED - you must specify a snippet engine
+        -- REQUIRED - you must specify a snippet engine
         expand = function(args)
             vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
             -- require("luasnip").lsp_expand(args.body) -- For `luasnip` users.
@@ -125,6 +126,18 @@ cmp.setup({
 --})
 
 -- Set up lspconfig.
+-- Set up lspconfig.
+local servers = {
+    'pylsp', 
+    'cmake',
+    'clangd',
+    'tsserver'}
+
+require("mason").setup()
+require("mason-lspconfig").setup({
+    ensure_installed = servers,
+})
+
 local lspconfig = require("lspconfig")
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
@@ -154,30 +167,31 @@ local on_attach = function(client, bufnr)
     }, bufnr)
 end
 
-local servers = {
-    'pylsp', 
-    'cmake', 
-    'tsserver'}
--- Enable some language servers with the additional completion capabilities offered by nvim-cmp
-for _, lsp in ipairs(servers) do
-    lspconfig[lsp].setup {on_attach = on_attach, capabilities = capabilities}
-end
-lspconfig["clangd"].setup {
-    on_attach = on_attach,
-    capabilities = capabilities,
-    cmd = {
-	"clangd",
-	"--background-index",
-	-- by default, clang-tidy use -checks=clang-diagnostic-*,clang-analyzer-*
-	-- to add more checks, create .clang-tidy file in the root directory
-	-- and add Checks key, see https://clang.llvm.org/extra/clang-tidy/
-	"--clang-tidy",
-	"--completion-style=bundled",
-	"--cross-file-rename",
-	"--header-insertion=iwyu",
-    }
-
-}
+require("mason-lspconfig").setup_handlers({
+    function(server_name)
+      lspconfig[server_name].setup({
+        on_attach = on_attach,
+        capabilities = capabilities,
+      })
+    end,
+    ["clangd"] = function()
+      lspconfig.clangd.setup({
+        cmd = {
+            "clangd",
+            "--background-index",
+            -- by default, clang-tidy use -checks=clang-diagnostic-*,clang-analyzer-*
+            -- to add more checks, create .clang-tidy file in the root directory
+            -- and add Checks key, see https://clang.llvm.org/extra/clang-tidy/
+            "--clang-tidy",
+            "--completion-style=bundled",
+            "--cross-file-rename",
+            "--header-insertion=iwyu",
+        },
+        on_attach = on_attach,
+        capabilities = capabilities,
+      })
+    end,
+})
 
 -- ( hop )
 require("hop").setup()
