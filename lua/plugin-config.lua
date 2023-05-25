@@ -1,23 +1,43 @@
--- ( indent-blankline )
-vim.opt.list = true
-vim.opt.listchars:append "space:⋅"
-
-require("indent_blankline").setup {space_char_blankline = "."}
-
--- ( rainbow )
-vim.g.rainbow_active = 1
-
--- ( autoclose )
+require('leap').add_default_mappings()
+require("indent_blankline").setup{space_char_blankline = "."}
 require("autoclose").setup()
+require("nvim-surround").setup()
+--require("hop").setup()
+require("nvim-highlight-colors").setup()
+require("lualine").setup{options={theme="codedark"}}
 
--- ( vim-cmake )
-vim.g.cmake_build_dir_location = "./build"
-vim.g.cmake_link_compile_commands = 1
+require("eyeliner").setup {
+    highlight_on_key = true, -- show highlights only after keypress
+    dim = true               -- dim all other characters if set to true (recommended!)
+}
+
+-- require("lightspeed").setup {
+--     ignore_case = false,
+--     exit_after_idle_msecs = { unlabeled = nil, labeled = nil },
+--     --- s/x ---
+--     jump_to_unique_chars = { safety_timeout = 400 },
+--     match_only_the_start_of_same_char_seqs = true,
+--     force_beacons_into_match_width = false,
+--     -- Display characters in a custom way in the highlighted matches.
+--     substitute_chars = { ['\r'] = '¬', },
+--     -- Leaving the appropriate list empty effectively disables "smart" mode,
+--     -- and forces auto-jump to be on or off.
+--     safe_labels = {},
+--     labels = {},
+--     -- These keys are captured directly by the plugin at runtime.
+--     special_keys = {
+--         next_match_group = '<space>',
+--         prev_match_group = '<tab>',
+--     },
+--     --- f/t ---
+--     limit_ft_matches = 4,
+--     repeat_ft_with_target_char = false,
+-- }
 
 -- ( treesitter )
 require("nvim-treesitter.configs").setup {
     -- A list of parser names, or "all" (the four listed parsers should always be installed)
-    ensure_installed = {"c", "cpp", "typescript", "python"},
+    ensure_installed = {"c", "cpp", "typescript", "python", "cmake"},
 
     -- Install parsers synchronously (only applied to `ensure_installed`)
     sync_install = false,
@@ -57,24 +77,6 @@ require("nvim-treesitter.configs").setup {
     }
 }
 
--- ( nvim-tree )
-require("nvim-tree").setup()
-
--- ( nvim surround )
-require("nvim-surround").setup()
-
--- ( hjkl config )
--- require("delaytrain").setup {
---     delay_ms = 1000, -- How long repeated usage of a key should be prevented
---     grace_period = 1, -- How many repeated keypresses are allowed
---     keys = { -- Which keys (in which modes) should be delayed
---         ['nv'] = {'h', 'j', 'k', 'l'},
---         ['nvi'] = {'<Left>', '<Down>', '<Up>', '<Right>'}
---     },
---     ignore_filetypes = {} -- Example: set to {"help", "NvimTr*"} to
---     -- disable the plugin for help and NvimTree
--- }
-
 -- ( nvim-cmp )
 local cmp = require 'cmp'
 local lspkind = require 'lspkind'
@@ -91,8 +93,6 @@ cmp.setup({
         })
     },
     snippet = {
-        -- REQUIRED - you must specify a snippet engine
-        -- REQUIRED - you must specify a snippet engine
         expand = function(args)
             vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
             -- require("luasnip").lsp_expand(args.body) -- For `luasnip` users.
@@ -100,38 +100,33 @@ cmp.setup({
             -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
         end
     },
-    window = {
-        -- completion = cmp.config.window.bordered(),
-        -- documentation = cmp.config.window.bordered(),
-    },
     mapping = cmp.mapping.preset.insert({
         ['<C-b>'] = cmp.mapping.scroll_docs(-4),
         ['<C-f>'] = cmp.mapping.scroll_docs(4),
-        ['<C-Space>'] = cmp.mapping.complete(),
+        -- ['<C-Space>'] = cmp.mapping.complete(),
         ['<C-e>'] = cmp.mapping.abort(),
-        ['<Tab>'] = cmp.mapping.confirm({select = true}) -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+        ['<C-Space>'] = cmp.mapping.confirm({select = true}) -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
     }),
     sources = cmp.config.sources({
-        {name = 'nvim_lsp'}, {name = 'vsnip'} -- For vsnip users.
+        {name = 'nvim_lsp'},
+        {name = 'vsnip'} -- For vsnip users.
         -- { name = 'luasnip' }, -- For luasnip users.
         -- { name = 'ultisnips' }, -- For ultisnips users.
         -- { name = 'snippy' }, -- For snippy users.
     }, {{name = 'buffer'}})
 })
 
--- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
---cmp.setup.cmdline({'/', '?'}, {
---    mapping = cmp.mapping.preset.cmdline(),
---    sources = {{name = 'buffer'}}
---})
-
 -- Set up lspconfig.
--- Set up lspconfig.
+vim.lsp.set_log_level("debug")
 local servers = {
-    'pylsp', 
-    'cmake',
+    --'ruff_lsp',
+    'pylsp',
+    --'jedi_language_server',
+    -- 'texlab',
+    -- 'cmake',
     'clangd',
-    'tsserver'}
+    -- 'tsserver'
+    }
 
 require("mason").setup()
 require("mason-lspconfig").setup({
@@ -144,26 +139,29 @@ capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
 local on_attach = function(client, bufnr)
     -- Mappings.
     -- See `:help vim.lsp.*` for documentation on any of the below functions
-    local bufopts = {noremap = true, silent = true} -- , buffer=bufnr }
-    vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
+    local bufopts = {noremap = true, silent = true, buffer=bufnr }
+    vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
     vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
-    vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
+    vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
     vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, bufopts)
-    vim.keymap.set('n', '<C-s>', vim.lsp.buf.signature_help, bufopts)
-    vim.keymap.set('n', '<space>h', vim.lsp.buf.hover, bufopts)
-    vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, bufopts)
-    vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, bufopts)
-    vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
-    vim.keymap.set('n', '<space>f',
+    vim.keymap.set('n', 'go', vim.lsp.buf.type_definition, bufopts)
+    vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
+    vim.keymap.set('n', 'gs', vim.lsp.buf.signature_help, bufopts)
+    vim.keymap.set('n', '<F2>', vim.lsp.buf.rename, bufopts)
+    vim.keymap.set('n', '<F3>',
                    function() vim.lsp.buf.format {async = true} end, bufopts)
+    vim.keymap.set('n', '<F4>', vim.lsp.buf.code_action, bufopts)
+    vim.keymap.set('n', 'gl', vim.diagnostic.open_float, bufopts)
+    vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, bufopts)
+    vim.keymap.set('n', ']d', vim.diagnostic.goto_next, bufopts)
     require("lsp_signature").on_attach({
-	  bind = true, -- This is mandatory, otherwise border config won't get registered.
-	  hint_prefix = "> ",  -- Panda for parameter, NOTE: for the terminal not support emoji, might crash
-	  handler_opts = {
-	    border = "rounded"   -- double, rounded, single, shadow, none, or a table of borders
-	  },
-	  floating_window_above_cur_line = false,
-	  select_signature_key = "<M-n>"
+          bind = true, -- This is mandatory, otherwise border config won't get registered.
+          hint_prefix = "> ",  -- Panda for parameter, NOTE: for the terminal not support emoji, might crash
+          handler_opts = {
+            border = "rounded"   -- double, rounded, single, shadow, none, or a table of borders
+          },
+          floating_window_above_cur_line = false,
+          select_signature_key = "<M-n>"
     }, bufnr)
 end
 
@@ -175,34 +173,24 @@ require("mason-lspconfig").setup_handlers({
       })
     end,
     ["clangd"] = function()
-      lspconfig.clangd.setup({
-        cmd = {
-            "clangd",
-            "--background-index",
-            -- by default, clang-tidy use -checks=clang-diagnostic-*,clang-analyzer-*
-            -- to add more checks, create .clang-tidy file in the root directory
-            -- and add Checks key, see https://clang.llvm.org/extra/clang-tidy/
-            "--clang-tidy",
-            "--completion-style=bundled",
-            "--cross-file-rename",
-            "--header-insertion=iwyu",
-        },
-        on_attach = on_attach,
-        capabilities = capabilities,
-      })
+        lspconfig.clangd.setup({
+            cmd = {
+                "clangd",
+                "--background-index",
+                -- by default, clang-tidy use -checks=clang-diagnostic-*,clang-analyzer-*
+                -- to add more checks, create .clang-tidy file in the root directory
+                -- and add Checks key, see https://clang.llvm.org/extra/clang-tidy/
+                "--clang-tidy",
+                "--completion-style=bundled",
+                "--cross-file-rename",
+                "--header-insertion=iwyu",
+            },
+            on_attach = on_attach,
+            capabilities = capabilities,
+        })
     end,
 })
 
--- ( hop )
-require("hop").setup()
-
--- ( hex color viewer )
-require("nvim-highlight-colors").setup()
-
--- ( LuaLine )
-require("lualine").setup{
-    options = { theme = "codedark" }
-}
 
 -- ( Diagrams )
 function _G.Toggle_venn()

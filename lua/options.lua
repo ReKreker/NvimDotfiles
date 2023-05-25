@@ -1,5 +1,5 @@
 vim.opt.virtualedit    = 'all'
-vim.opt.foldcolumn     = '1' -- add column for folding's + - |
+-- vim.opt.foldcolumn     = '1' -- add column for folding's + - |
 vim.opt.shiftwidth     = 4
 vim.opt.softtabstop    = 4
 vim.opt.relativenumber = true
@@ -24,3 +24,15 @@ vim.opt.fillchars:append({
    vertright = '┣',
    verthoriz = '╋',
 })
+
+
+-- plugins
+vim.opt.list = true
+vim.opt.listchars:append "space:⋅"
+
+vim.g.rainbow_active = 1
+
+vim.g.cmake_build_dir_location = "./build"
+vim.g.cmake_link_compile_commands = 1
+
+vim.api.nvim_set_hl(0, "EyelinerDimmed", { fg="#6e6f70", underline = true })

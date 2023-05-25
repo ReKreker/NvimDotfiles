@@ -8,41 +8,41 @@ end
 map('n', '<CR>', ':noh<CR><CR>', {noremap = true}) -- clears search highlight & still be enter
 
 -- windows move
-map('n', '<c-j>', '<c-w>j', {noremap = true})
-map('n', '<c-h>', '<c-w>h', {noremap = true})
-map('n', '<c-k>', '<c-w>k', {noremap = true})
-map('n', '<c-l>', '<c-w>l', {noremap = true})
+-- map('n', '<c-j>', '<c-w>j', {noremap = true})
+-- map('n', '<c-h>', '<c-w>h', {noremap = true})
+-- map('n', '<c-k>', '<c-w>k', {noremap = true})
+-- map('n', '<c-l>', '<c-w>l', {noremap = true})
 
 -- hop
-local hop = require('hop')
-local directions = require('hop.hint').HintDirection
-vim.keymap.set('', '<M-w>', function() hop.hint_words() end, {remap = true})
-vim.keymap.set('', '<M-f>', function()
-    hop.hint_char1({
-        direction = directions.AFTER_CURSOR,
-        current_line_only = true
-    })
-end, {remap = true})
-vim.keymap.set('', '<M-F>', function()
-    hop.hint_char1({
-        direction = directions.BEFORE_CURSOR,
-        current_line_only = true
-    })
-end, {remap = true})
-vim.keymap.set('', '<M-t>', function()
-    hop.hint_char1({
-        direction = directions.AFTER_CURSOR,
-        current_line_only = true,
-        hint_offset = -1
-    })
-end, {remap = true})
-vim.keymap.set('', '<M-T>', function()
-    hop.hint_char1({
-        direction = directions.BEFORE_CURSOR,
-        current_line_only = true,
-        hint_offset = 1
-    })
-end, {remap = true})
+--local hop = require('hop')
+--local directions = require('hop.hint').HintDirection
+--vim.keymap.set('', '<M-w>', function() hop.hint_words() end, {remap = true})
+--vim.keymap.set('', '<M-f>', function()
+--    hop.hint_char1({
+--        direction = directions.AFTER_CURSOR,
+--        current_line_only = true
+--    })
+--end, {remap = true})
+--vim.keymap.set('', '<M-F>', function()
+--    hop.hint_char1({
+--        direction = directions.BEFORE_CURSOR,
+--        current_line_only = true
+--    })
+--end, {remap = true})
+--vim.keymap.set('', '<M-t>', function()
+--    hop.hint_char1({
+--        direction = directions.AFTER_CURSOR,
+--        current_line_only = true,
+--        hint_offset = -1
+--    })
+--end, {remap = true})
+--vim.keymap.set('', '<M-T>', function()
+--    hop.hint_char1({
+--        direction = directions.BEFORE_CURSOR,
+--        current_line_only = true,
+--        hint_offset = 1
+--    })
+--end, {remap = true})
 
 -- lspconfig
 local opts = {noremap = true, silent = true}
@@ -69,3 +69,11 @@ vim.keymap.set('i', '<A-k>', '<ESC>gki' )
 vim.keymap.set('n', '<space>h1', "yypVr=o")
 vim.keymap.set('n', '<space>h2', "yypVr-o")
 vim.keymap.set('n', '<space>h3', [[V:s/\s*\(.*\w\)\s*/- \1 -/<CR>o]])
+
+-- vsnip
+vim.cmd([[
+imap <expr> <Tab>   vsnip#jumpable(1)   ? '<Plug>(vsnip-jump-next)' : '<Tab>'
+smap <expr> <Tab>   vsnip#jumpable(1)   ? '<Plug>(vsnip-jump-next)' : '<Tab>'
+imap <expr> <S-Tab> vsnip#jumpable(-1)  ? '<Plug>(vsnip-jump-prev)' : '<S-Tab>'
+smap <expr> <S-Tab> vsnip#jumpable(-1)  ? '<Plug>(vsnip-jump-prev)' : '<S-Tab>'
+]])
